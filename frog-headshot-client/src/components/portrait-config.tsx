@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import {
   Check,
-  Loader2,
   RectangleHorizontal,
   RectangleVerticalIcon,
   Sparkles,
@@ -20,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "./ui/separator";
-import { Textarea } from "./ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "./ui/switch";
 
@@ -30,36 +28,55 @@ const PortraitConfig = () => {
   const [controlNetSliderValue, setControlNetSliderValue] = useState(0.5);
   const [ipAdapterSliderValue, setIpAdapterSliderValue] = useState(0.45);
   const [image, setImage] = useState<string | null>(null);
+  const [issubbmiting, setIssubmiting] = useState(false);
 
   const [isUploading, setIsUploading] = useState(false);
 
   const [file, setFile] = useState<File | null>(null);
 
-  const [imageChangeLoading, setImageChangeLoading] = useState(false);
-
-  const getImageURL = async () => {
+  const getImageURL = async (): Promise<void> => {
     if (file) {
-      const { data } = await supabase.storage
-        .from("portrait_bucket")
-        .getPublicUrl(file.name);
-      setImage(data.publicUrl);
+      try {
+        const { data } = await supabase.storage
+          .from("portrait_bucket")
+          .getPublicUrl(file.name);
+
+        if (!file) {
+          console.error("Error fetching image URL");
+        } else {
+          if (data) {
+            setImage(data.publicUrl);
+          } else {
+            console.error("No data received while fetching image URL.");
+          }
+        }
+      } catch (error: Error | unknown) {
+        console.error("Error fetching image URL:", error);
+      }
+    } else {
+      console.error("No file available to fetch image URL.");
     }
   };
 
   const handleUpload = async () => {
     if (file) {
-      const { data, error } = await supabase.storage
-        .from("portrait_bucket")
-        .upload(file.name, file);
+      setIsUploading(true); // Set uploading state to true when starting upload
+      try {
+        const { data, error } = await supabase.storage
+          .from("portrait_bucket")
+          .upload(file.name, file);
 
-      await getImageURL();
-
-      if (data) {
-        console.log("File uploaded successfully");
-        console.log(file);
-      } else {
-        console.log(error);
-        console.log("Error uploading file");
+        if (data) {
+          await getImageURL();
+        } else {
+          console.error(error);
+          console.error("Error uploading file");
+        }
+      } catch (error) {
+        console.error(error);
+        console.error("Error uploading file");
+      } finally {
+        setIsUploading(false); // Reset uploading state after upload is complete
       }
     }
   };
@@ -67,47 +84,72 @@ const PortraitConfig = () => {
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setImageChangeLoading(true);
-
     if (event.target.files && event.target.files[0]) {
       setFile(event.target.files[0]);
     }
-
-    setImageChangeLoading(false);
   };
-
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIssubmiting(true);
+
     const formData = new FormData(e.currentTarget as HTMLFormElement);
 
-    setIsUploading(true);
+    // Call handleUpload and wait for it to complete
+    // await handleUpload();
 
-    await handleUpload();
-
-    const prompt = formData.get("prompt") as string;
+    const age = formData.get("age");
+    const gender = formData.get("gender");
+    const body = formData.get("body_type");
     const controlNet = formData.get("controlnet");
     const ip = formData.get("ipadapter");
-
     const style = formData.get("style");
     const orientation = formData.get("orientation");
     const branding = formData.get("branding");
 
-    const formObject = {
-      prompt: prompt,
-      controlNet: controlNet,
-      ip: ip,
-      imgUrl: image,
-      style: style,
-      orientation: orientation,
-      branding: branding,
+    // setTimeout(async () => {
+    //   await getImageURL(); // Call getImageURL after successful upload
+    // }, 4000); // Wait for 4 seconds (adjust as needed)
+
+    // const formObject = {
+    //   age: age,
+    //   gender: gender,
+    //   bodyType: body,
+    //   controlNet: controlNet,
+    //   ip: ip,
+    //   imgUrl: image, // Access image after handleUpload completes
+    //   style: style,
+    //   orientation: orientation,
+    //   branding: branding,
+    // };
+
+    const encodedImgUrl = encodeURIComponent(image as string);
+    console.log(encodedImgUrl);
+
+      const url = `https://ff95-34-73-20-250.ngrok-free.app/generate_prompt?age=${age}&gender=${gender}&bodyType=${body}&controlNet=${controlNet}&ip=${ip}&imgUrl=${encodedImgUrl}&style=${style}&orientation=${orientation}&branding=${branding}`;
+
+    // const url =
+    //   "https://ff95-34-73-20-250.ngrok-free.app/generate_prompt/?age=23&gender=male&bodyType=xl&controlNet=0.45&ip=0.34&imgUrl=example.cxo&style=sdf&orientation=sdf&branding=on";
+    console.log(url);
+
+    const requestOptions = {
+      method: "GET",
+      headers: new Headers({
+        "ngrok-skip-browser-warning": "69420",
+      }),
     };
 
-    console.log("---------------------------------");
-    console.log("image", image);
-
-    console.log("Form Object:", formObject);
-
-    setIsUploading(false);
+    try {
+      const response = await fetch(url, requestOptions); // Use the constructed URL
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      console.log("Response:", data);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+    // console.log("Form Object after wait:", formObject); // Log after specified delay
+    setIssubmiting(false);
   };
 
   return (
@@ -119,19 +161,55 @@ const PortraitConfig = () => {
           stand out.
         </p>
         <Separator className="mb-4 mt-4" />
-        <form onSubmit={submitHandler} className="w-full">
-          <div className="prompt w-full ">
-            <Label htmlFor="default-input" className="text-sm opacity-50">
-              Prompt ( max 30 words)
-            </Label>
-            <Textarea
-              name="prompt"
-              className="mt-3 ml-2 placeholder:opacity-30 rounded-xl w-full"
-              placeholder="Please write the features seperated by Comma, ex: brown eyes, pointy nose, brown hair."
-              // onChange={handlePromptChange}
-            />
+        <form onSubmit={submitHandler} className="w-full ">
+          <Label className="text-sm opacity-50">General Info</Label>
+          <div className="flex ml-2 justify-start items-start">
+            <div className="age w-[30%] ">
+              <Input
+                name="age"
+                type="number"
+                className="mt-3  h-12 rounded-xl w-[80%]"
+                placeholder="Age "
+                max={70}
+                min={19}
+                required
+                // onChange={handleageChange}
+              />
+            </div>
+
+            <Select name="gender" required>
+              <SelectTrigger className="w-[175px] mt-3 rounded-xl  h-12">
+                <SelectValue
+                  placeholder="Select Gender"
+                  className="text-sm opacity-50"
+                  defaultValue={"Male"}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female"> Female</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <div className="sliders-container w-full mt-4 ">
+
+          <Select name="body_type" required>
+            <SelectTrigger className="w-[175px] mt-3 ml-2 rounded-xl  h-12">
+              <SelectValue
+                placeholder="Select body type"
+                className="text-sm opacity-50"
+                defaultValue={"xl"}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="m">m</SelectItem>
+              <SelectItem value="l">l</SelectItem>
+              <SelectItem value="xl"> xl</SelectItem>
+              <SelectItem value="xxl"> xxl</SelectItem>
+              <SelectItem value="xxxl"> xxxl</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="sliders-container w-full mt-6 ">
             <div className="slider w-full">
               <Label htmlFor="default-range" className="text-sm opacity-50 ">
                 ControlNet
@@ -175,38 +253,46 @@ const PortraitConfig = () => {
 
           <span className="text-sm opacity-50">Input Image Controls</span>
           <div className="flex w-fit  justify-start items-start flex-col   h-fit rounded-xl  ml-2 mt-2">
-            <div className="  rounded-xl flex justify-center items-center ">
-              <Label
-                htmlFor="picture"
-                
-                className="text-sm upload-image flex justify-center items-center opacity-50  bg-secondary p-3 rounded-xl cursor-pointer "
-              >
-                {/* Condition: If there is a file selected and imageChangeLoading is false */}
-                {file ? (
-                  // Display upload icon
-                  <Check size={30} strokeWidth={1.25} />
+            <div className="  rounded-xl  justify-center items-center ">
+              <div className="flex w-full justify-center items-center">
+                <Label
+                  htmlFor="picture"
+                  className="text-sm upload-image flex justify-center items-center opacity-50  bg-secondary p-3 rounded-xl cursor-pointer "
+                >
+                  {/* Condition: If there is a file selected and imageChangeLoading is false */}
+                  {file ? (
+                    // Display upload icon
+                    <Check size={30} strokeWidth={1.25} />
+                  ) : (
+                    <Upload size={30} strokeWidth={1.25} />
+                    // Display check icon
+                  )}
+                </Label>
+                <Input
+                  id="picture"
+                  type="file"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
 
-                ) : (
-                  <Upload size={30} strokeWidth={1.25} />
-                  // Display check icon
-                )}
-              </Label>
-              <Input
-                id="picture"
-                type="file"
-                className="hidden"
-                onChange={handleFileChange}
-              />
+                <Button
+                  className="ml-2 rounded-sm"
+                  variant="secondary"
+                  onClick={handleUpload}
+                  type="button"
+                  disabled={isUploading}
+                >
+                  {isUploading
+                    ? "Uploading..."
+                    : image
+                      ? "Uploaded"
+                      : "Upload Image"}
+                </Button>
+              </div>
 
-              {/* <Button
-                className="ml-2 rounded-sm"
-                variant="secondary"
-                onClick={handleUpload}
-              >
-                {uploaded ? "Uploading..." : "Upload Image"}
-              </Button> */}
-              <Select name="style">
-                <SelectTrigger className="w-[175px] rounded-xl ml-3 h-12">
+              <br />
+              <Select name="style" required>
+                <SelectTrigger className="w-[175px] rounded-xl  h-12">
                   <SelectValue
                     placeholder="Select Style"
                     className="text-sm opacity-50"
@@ -234,7 +320,7 @@ const PortraitConfig = () => {
                   className="text-sm upload-image flex justify-center items-center  bg-secondary p-3 rounded-xl cursor-pointer hover:bg-secondary hover:opacity-90 "
                 >
                   <RadioGroupItem
-                    value="square"
+                    value="1"
                     id="option-two"
                     itemType="button"
                     className="mr-2"
@@ -247,11 +333,7 @@ const PortraitConfig = () => {
                   htmlFor="option-two"
                   className="text-sm upload-image flex justify-center items-center  bg-secondary p-3 rounded-xl cursor-pointer hover:bg-secondary hover:opacity-90 "
                 >
-                  <RadioGroupItem
-                    value="rectangle-horizontal"
-                    id="option-two"
-                    className="mr-2"
-                  />
+                  <RadioGroupItem value="2" id="option-two" className="mr-2" />
                   <RectangleHorizontal strokeWidth={1.25} size={30} />
                 </Label>
               </div>
@@ -260,11 +342,7 @@ const PortraitConfig = () => {
                   htmlFor="option-two"
                   className="text-sm upload-image flex justify-center items-center bg-secondary p-3 rounded-xl cursor-pointer hover:bg-secondary hover:opacity-90 "
                 >
-                  <RadioGroupItem
-                    value="rectangle-vertical"
-                    id="option-two"
-                    className="mr-2"
-                  />
+                  <RadioGroupItem value="3" id="option-two" className="mr-2" />
                   <RectangleVerticalIcon strokeWidth={1.25} size={30} />
                 </Label>
               </div>
