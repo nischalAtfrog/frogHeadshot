@@ -13,9 +13,11 @@ import {
 import { Info } from "lucide-react";
 import OutputControl from "@/components/output-control";
 
+
+
 const Home = () => {
   const [open, setOpen] = useState(false);
-
+ // State to hold response data
   const wait = () => new Promise((resolve) => setInterval(resolve, 1000));
 
   useEffect(() => {
@@ -33,6 +35,7 @@ const Home = () => {
     };
   }, []);
 
+ 
   return (
     <React.Fragment>
       <Dialog open={open} onOpenChange={setOpen}>

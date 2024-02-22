@@ -110,31 +110,29 @@ const PortraitConfig = () => {
     //   await getImageURL(); // Call getImageURL after successful upload
     // }, 4000); // Wait for 4 seconds (adjust as needed)
 
-    // const formObject = {
-    //   age: age,
-    //   gender: gender,
-    //   bodyType: body,
-    //   controlNet: controlNet,
-    //   ip: ip,
-    //   imgUrl: image, // Access image after handleUpload completes
-    //   style: style,
-    //   orientation: orientation,
-    //   branding: branding,
-    // };
-
-
+    const formObject = {
+      age: age,
+      gender: gender,
+      bodyType: body,
+      controlNet: controlNet,
+      ip: ip,
+      imgUrl: image, // Access image after handleUpload completes
+      style: style,
+      orientation: orientation,
+      branding: branding,
+    };
 
     const encodedImgUrl = encodeURIComponent(image as string);
-    console.log(encodedImgUrl);
+    console.log("-------" + encodedImgUrl);
 
-      const url = `https://7bcd-34-31-63-228.ngrok-free.app/generate?age=${age}&gender=${gender}&bodyType=${body}&controlNet=${controlNet}&ip=${ip}&imgUrl=${encodedImgUrl}&style=${style}&orientation=${orientation}&branding=${branding}`;
+    const url = `https://72a7-34-143-173-121.ngrok-free.app/generate/?age=${age}&gender=${gender}&body=${body}&controlnet=${controlNet}&imgUrl=${encodedImgUrl}&ip=${ip}&style=${style}&orientation=${orientation}&branding=${branding}`;
 
     // const url =
     //   "https://ff95-34-73-20-250.ngrok-free.app/generate_prompt/?age=23&gender=male&bodyType=xl&controlNet=0.45&ip=0.34&imgUrl=example.cxo&style=sdf&orientation=sdf&branding=on";
     console.log(url);
 
     const requestOptions = {
-      method: "GET",
+      method: "POST",
       headers: new Headers({
         "ngrok-skip-browser-warning": "69420",
       }),
@@ -148,7 +146,7 @@ const PortraitConfig = () => {
       const data = await response.json();
       console.log("Response:", data);
     } catch (error) {
-      console.error("Error:", error);
+      // console.error("Error:", error);
     }
     // console.log("Form Object after wait:", formObject); // Log after specified delay
     setIssubmiting(false);
@@ -168,7 +166,6 @@ const PortraitConfig = () => {
 
       // 'data' will contain the latest entry
       console.log(data[0].url);
-
     } catch (error) {
       console.error("Error fetching latest entry:", error.message);
     }
@@ -176,8 +173,7 @@ const PortraitConfig = () => {
 
   useEffect(() => {
     fetchLatestEntry();
-  })
-
+  });
 
   return (
     <React.Fragment>
@@ -187,15 +183,15 @@ const PortraitConfig = () => {
           AI's gonna need help in setting some qualities that could make you
           stand out.
         </p>
-        <Separator className="mb-4 mt-4" />
+        <Separator className="mb-4 mt-2" />
         <form onSubmit={submitHandler} className="w-full ">
           <Label className="text-sm opacity-50">General Info</Label>
-          <div className="flex ml-2 justify-start items-start">
-            <div className="age w-[30%] ">
+          <div className="flex ml-2 justify-start items-start mt-2">
+            <div className="age w-[20%] mr-3">
               <Input
                 name="age"
                 type="number"
-                className="mt-3  h-12 rounded-xl w-[80%]"
+                className="  h-12 rounded-xl placeholder:opacity-100  "
                 placeholder="Age "
                 max={70}
                 min={19}
@@ -205,9 +201,9 @@ const PortraitConfig = () => {
             </div>
 
             <Select name="gender" required>
-              <SelectTrigger className="w-[175px] mt-3 rounded-xl  h-12">
+              <SelectTrigger className="w-fit rounded-xl h-12">
                 <SelectValue
-                  placeholder="Select Gender"
+                  placeholder="Gender"
                   className="text-sm opacity-50"
                   defaultValue={"Male"}
                 />
@@ -217,24 +213,23 @@ const PortraitConfig = () => {
                 <SelectItem value="female"> Female</SelectItem>
               </SelectContent>
             </Select>
+            <Select name="body_type" required>
+              <SelectTrigger className="w-[120px]  ml-2 rounded-xl  h-12">
+                <SelectValue
+                  placeholder="Body type"
+                  className="text-sm opacity-50"
+                  defaultValue={"xl"}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="m">m</SelectItem>
+                <SelectItem value="l">l</SelectItem>
+                <SelectItem value="xl"> xl</SelectItem>
+                <SelectItem value="xxl"> xxl</SelectItem>
+                <SelectItem value="xxxl"> xxxl</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-
-          <Select name="body_type" required>
-            <SelectTrigger className="w-[175px] mt-3 ml-2 rounded-xl  h-12">
-              <SelectValue
-                placeholder="Select body type"
-                className="text-sm opacity-50"
-                defaultValue={"xl"}
-              />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="m">m</SelectItem>
-              <SelectItem value="l">l</SelectItem>
-              <SelectItem value="xl"> xl</SelectItem>
-              <SelectItem value="xxl"> xxl</SelectItem>
-              <SelectItem value="xxxl"> xxxl</SelectItem>
-            </SelectContent>
-          </Select>
 
           <div className="sliders-container w-full mt-6 ">
             <div className="slider w-full">
