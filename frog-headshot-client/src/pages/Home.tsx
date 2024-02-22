@@ -76,7 +76,7 @@ const Home = () => {
             </button>
             <PortraitConfig />
           </div>
-          <div className="right h-full  border-2 rounded-[20px] relative col-span-3 p-5 ">
+          <div className="right h-full  border-2 rounded-[20px] relative col-span-4 p-5 ">
             <OutputControl />
           </div>
         </div>

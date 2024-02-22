@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import {
   Check,
@@ -122,10 +122,12 @@ const PortraitConfig = () => {
     //   branding: branding,
     // };
 
+
+
     const encodedImgUrl = encodeURIComponent(image as string);
     console.log(encodedImgUrl);
 
-      const url = `https://ff95-34-73-20-250.ngrok-free.app/generate_prompt?age=${age}&gender=${gender}&bodyType=${body}&controlNet=${controlNet}&ip=${ip}&imgUrl=${encodedImgUrl}&style=${style}&orientation=${orientation}&branding=${branding}`;
+      const url = `https://7bcd-34-31-63-228.ngrok-free.app/generate?age=${age}&gender=${gender}&bodyType=${body}&controlNet=${controlNet}&ip=${ip}&imgUrl=${encodedImgUrl}&style=${style}&orientation=${orientation}&branding=${branding}`;
 
     // const url =
     //   "https://ff95-34-73-20-250.ngrok-free.app/generate_prompt/?age=23&gender=male&bodyType=xl&controlNet=0.45&ip=0.34&imgUrl=example.cxo&style=sdf&orientation=sdf&branding=on";
@@ -151,6 +153,31 @@ const PortraitConfig = () => {
     // console.log("Form Object after wait:", formObject); // Log after specified delay
     setIssubmiting(false);
   };
+
+  const fetchLatestEntry = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("urls")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (error) {
+        throw error;
+      }
+
+      // 'data' will contain the latest entry
+      console.log(data[0].url);
+
+    } catch (error) {
+      console.error("Error fetching latest entry:", error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchLatestEntry();
+  })
+
 
   return (
     <React.Fragment>
