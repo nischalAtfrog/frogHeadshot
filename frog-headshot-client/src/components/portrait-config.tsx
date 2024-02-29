@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import {
   Check,
+  Loader2,
   RectangleHorizontal,
   RectangleVerticalIcon,
   Sparkles,
@@ -21,18 +22,21 @@ import {
 import { Separator } from "./ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "./ui/switch";
-
-import { supabase } from "@/helpers/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
+import { useImage } from "@/hooks/useImage";
 
 const PortraitConfig = () => {
+  const { setImageUrl, setLoadingState, loadingState } = useImage();
+
   const [controlNetSliderValue, setControlNetSliderValue] = useState(0.5);
   const [ipAdapterSliderValue, setIpAdapterSliderValue] = useState(0.45);
   const [image, setImage] = useState<string | null>(null);
-  const [issubbmiting, setIssubmiting] = useState(false);
 
   const [isUploading, setIsUploading] = useState(false);
 
   const [file, setFile] = useState<File | null>(null);
+
+  const [urlTotheColab, setUrlToTheColab] = useState<string | null>(null);
 
   const getImageURL = async (): Promise<void> => {
     if (file) {
@@ -90,7 +94,8 @@ const PortraitConfig = () => {
   };
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIssubmiting(true);
+
+    setLoadingState("loading");
 
     const formData = new FormData(e.currentTarget as HTMLFormElement);
 
@@ -106,29 +111,9 @@ const PortraitConfig = () => {
     const orientation = formData.get("orientation");
     const branding = formData.get("branding");
 
-    // setTimeout(async () => {
-    //   await getImageURL(); // Call getImageURL after successful upload
-    // }, 4000); // Wait for 4 seconds (adjust as needed)
-
-    const formObject = {
-      age: age,
-      gender: gender,
-      bodyType: body,
-      controlNet: controlNet,
-      ip: ip,
-      imgUrl: image, // Access image after handleUpload completes
-      style: style,
-      orientation: orientation,
-      branding: branding,
-    };
-
     const encodedImgUrl = encodeURIComponent(image as string);
     console.log("-------" + encodedImgUrl);
-
-    const url = `https://72a7-34-143-173-121.ngrok-free.app/generate/?age=${age}&gender=${gender}&body=${body}&controlnet=${controlNet}&imgUrl=${encodedImgUrl}&ip=${ip}&style=${style}&orientation=${orientation}&branding=${branding}`;
-
-    // const url =
-    //   "https://ff95-34-73-20-250.ngrok-free.app/generate_prompt/?age=23&gender=male&bodyType=xl&controlNet=0.45&ip=0.34&imgUrl=example.cxo&style=sdf&orientation=sdf&branding=on";
+    const url = `${urlTotheColab}/generate/?age=${age}&gender=${gender}&body=${body}&controlnet=${controlNet}&imgUrl=${encodedImgUrl}&ip=${ip}&style=${style}&orientation=${orientation}&branding=${branding}`;
     console.log(url);
 
     const requestOptions = {
@@ -145,11 +130,11 @@ const PortraitConfig = () => {
       }
       const data = await response.json();
       console.log("Response:", data);
+      setImageUrl(data.image);
+      setLoadingState("loaded");
     } catch (error) {
-      // console.error("Error:", error);
+      console.error("Error:", error);
     }
-    // console.log("Form Object after wait:", formObject); // Log after specified delay
-    setIssubmiting(false);
   };
 
   const fetchLatestEntry = async () => {
@@ -165,15 +150,16 @@ const PortraitConfig = () => {
       }
 
       // 'data' will contain the latest entry
-      console.log(data[0].url);
+      // console.log(data[0].url);
+      setUrlToTheColab(data[0].url);
     } catch (error) {
-      console.error("Error fetching latest entry:", error.message);
+      console.error("Error fetching latest entry");
     }
   };
 
   useEffect(() => {
     fetchLatestEntry();
-  });
+  }, []);
 
   return (
     <React.Fragment>
@@ -281,14 +267,11 @@ const PortraitConfig = () => {
                   htmlFor="picture"
                   className="text-sm upload-image flex justify-center items-center opacity-50  bg-secondary p-3 rounded-xl cursor-pointer "
                 >
-                  {/* Condition: If there is a file selected and imageChangeLoading is false */}
-                  {file ? (
-                    // Display upload icon
-                    <Check size={30} strokeWidth={1.25} />
-                  ) : (
-                    <Upload size={30} strokeWidth={1.25} />
-                    // Display check icon
-                  )}
+                 {
+                  file ? 
+                  file.name :
+                  "Upload Image"
+                 }
                 </Label>
                 <Input
                   id="picture"
@@ -298,17 +281,23 @@ const PortraitConfig = () => {
                 />
 
                 <Button
-                  className="ml-2 rounded-sm"
+                  className="ml-2 rounded-sm h-12"
                   variant="secondary"
                   onClick={handleUpload}
                   type="button"
                   disabled={isUploading}
                 >
-                  {isUploading
-                    ? "Uploading..."
-                    : image
-                      ? "Uploaded"
-                      : "Upload Image"}
+                  {isUploading ? (
+                    <Loader2
+                      className="animate-spin"
+                      size={30}
+                      strokeWidth={1.25}
+                    />
+                  ) : image ? (
+                    <Check className="w-6 h-6" />
+                  ) : (
+                    <Upload className="w-6 h-6" />
+                  )}
                 </Button>
               </div>
 
@@ -371,17 +360,6 @@ const PortraitConfig = () => {
             </div>
           </RadioGroup>
 
-          {/* <Separator className="mb-4 mt-4" />
-
-        <div className="upscale h-10 w-full pointer-events-none opacity-10 mb-2 ">
-          <Label htmlFor="default-range" className="text-sm">
-           Upscale
-          </Label>
-          <p className="text-sm p-2 mb-4">
-              Upscale is yet to be implemented.
-          </p>
-        </div> */}
-
           <div className="flex items-start space-x-2 flex-col mt-6 ">
             <Label htmlFor="branding" className="opacity-50 ">
               frog Branding
@@ -395,14 +373,43 @@ const PortraitConfig = () => {
             </div>
           </div>
 
-          <Separator className="mb-4 mt-16  bottom-20 w-full" />
+          {loadingState === "idle" && (
+            <>
+              <Button
+                className=" w-[90%] absolute bottom-5 rounded-[10px] text-[18px] h-fit p-3 font-bold text-white  transition-all duration-200 active:scale-[0.97] "
+                type="submit"
+                disabled={false}
+              >
+                Generate Portrait{" "}
+                {<Sparkles className="ml-2" strokeWidth={1.5} />}
+              </Button>
+            </>
+          )}
 
-          <Button
-            className=" w-[90%] absolute bottom-5 rounded-[10px] text-[18px] h-fit p-3 font-bold text-white  transition-all duration-200 active:scale-[0.97] "
-            type="submit"
-          >
-            Generate Portrait {<Sparkles className="ml-2" strokeWidth={1.5} />}
-          </Button>
+          {loadingState === "loading" && (
+            <>
+              <Button
+                className=" w-[90%] absolute bottom-5 rounded-[10px] text-[18px] h-fit p-3 font-bold text-white  transition-all duration-200 active:scale-[0.97] "
+                type="submit"
+                disabled={true}
+              >
+                Generating...{" "}
+                {<Loader2 className="ml-2 animate-spin" strokeWidth={1.5} />}
+              </Button>
+            </>
+          )}
+
+          {loadingState === "loaded" && (
+            <>
+              <Button
+                className=" w-[90%] absolute bottom-5 rounded-[10px] text-[18px] h-fit p-3 font-bold text-white  transition-all duration-200 active:scale-[0.97] "
+                type="submit"
+                disabled={true}
+              >
+                Generated! {<Check className="ml-2" strokeWidth={1.5} />}
+              </Button>
+            </>
+          )}
         </form>
       </div>
     </React.Fragment>
