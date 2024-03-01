@@ -285,6 +285,7 @@ const PortraitConfig = () => {
                   type="file"
                   className="hidden"
                   onChange={handleFileChange}
+                  required
                 />
 
                 <Button
@@ -329,6 +330,7 @@ const PortraitConfig = () => {
             className="w-[50%] mt-3"
             onValueChange={(e) => console.log(e)}
             name="orientation"
+            required
           >
             <span className="text-sm opacity-50">Choose Orientation</span>
             <div className="flex ml-2">
