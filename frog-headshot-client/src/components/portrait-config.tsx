@@ -62,8 +62,7 @@ const PortraitConfig = () => {
     }
   };
 
-  // generate random number 
-
+  // generate random number
 
   const handleUpload = async () => {
     if (file) {
@@ -135,6 +134,15 @@ const PortraitConfig = () => {
       console.log("Response:", data);
       setImageUrl(data.image);
       setLoadingState("loaded");
+
+      formData.delete("age");
+      formData.delete("gender");
+      formData.delete("body_type");
+      formData.delete("controlnet");
+      formData.delete("ipadapter");
+      formData.delete("style");
+      formData.delete("orientation");
+      formData.delete("branding");
     } catch (error) {
       console.error("Error:", error);
     }
@@ -270,11 +278,7 @@ const PortraitConfig = () => {
                   htmlFor="picture"
                   className="text-sm upload-image flex justify-center items-center opacity-50  bg-secondary p-3 rounded-xl cursor-pointer "
                 >
-                 {
-                  file ? 
-                  file.name :
-                  "Upload Image"
-                 }
+                  {file ? file.name : "Upload Image"}
                 </Label>
                 <Input
                   id="picture"

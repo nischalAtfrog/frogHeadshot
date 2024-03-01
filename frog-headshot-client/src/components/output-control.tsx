@@ -1,4 +1,5 @@
 import { useImage } from "@/hooks/useImage";
+import { supabase } from "@/lib/supabaseClient";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 // import { Progress } from "./ui/progress";
@@ -9,9 +10,22 @@ const OutputControl = () => {
 
   const [imgUrl, setImgUrl] = useState("");
 
+  const clearBucket = async () => {
+    try {
+      await supabase.storage.emptyBucket("portrait_bucket");
+      console.log("Bucket cleared successfully.");
+    } catch (error: Error | unknown) {
+      if (error instanceof Error) {
+        console.error("Error clearing bucket:", error.message);
+      }
+    }
+  };
   useEffect(() => {
     setImgUrl(imageUrl);
     console.log(imageUrl);
+    if (imageUrl) {
+      clearBucket();
+    }
   }, [imageUrl]);
 
   return (
@@ -37,7 +51,6 @@ const OutputControl = () => {
           <img
             src={imgUrl}
             alt="output"
-
             className=" h-full object-cover rounded-md saturate-[0.75] contrast-[0.95]"
           />
         )}

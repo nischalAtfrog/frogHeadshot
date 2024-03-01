@@ -12,16 +12,18 @@ import {
 } from "@/components/ui/dialog";
 import { Info } from "lucide-react";
 import OutputControl from "@/components/output-control";
+import { supabase } from "@/lib/supabaseClient";
 
 const Home = () => {
   const [open, setOpen] = useState(false);
 
   const wait = () => new Promise((resolve) => setInterval(resolve, 1000));
 
+
   useEffect(() => {
     let intervalId: string | number | NodeJS.Timeout | undefined;
 
-    wait().then(() => {
+    wait().then(async () => {
       setOpen(true);
       intervalId = setInterval(() => {
         setOpen(false);
@@ -32,6 +34,14 @@ const Home = () => {
       clearInterval(intervalId); // Cleanup function to clear the interval
     };
   }, []);
+
+  // useEffect(() => {
+  //   wait().then(() => {
+  //     setInterval(async () => {
+  //       await clearBucket();
+  //     }, 1000);
+  //   });
+  // }, []);
 
   return (
     <React.Fragment>

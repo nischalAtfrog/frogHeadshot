@@ -1,4 +1,4 @@
-# Portraits
+# Portraits. (beta)
 
 ## We have created this POC to generate professional portraits from the base photo of a person... 
 
