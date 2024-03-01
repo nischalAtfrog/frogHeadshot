@@ -62,6 +62,9 @@ const PortraitConfig = () => {
     }
   };
 
+  // generate random number 
+
+
   const handleUpload = async () => {
     if (file) {
       setIsUploading(true); // Set uploading state to true when starting upload
@@ -310,7 +313,7 @@ const PortraitConfig = () => {
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="artistic">🎨 Artistic</SelectItem>
+                  <SelectItem value="casual">🎨 casual </SelectItem>
                   <SelectItem value="professional">🧥 Professional</SelectItem>
                   <SelectItem value="random">🦾 Random </SelectItem>
                 </SelectContent>

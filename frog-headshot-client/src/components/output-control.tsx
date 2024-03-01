@@ -1,44 +1,17 @@
 import { useImage } from "@/hooks/useImage";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Progress } from "./ui/progress";
-import { Skeleton } from "./ui/skeleton";
+// import { Progress } from "./ui/progress";
+// import { Skeleton } from "./ui/skeleton";
 
 const OutputControl = () => {
   const { imageUrl, loadingState } = useImage();
 
-  const { progress, setProgress } = useState(0);
-
   const [imgUrl, setImgUrl] = useState("");
 
   useEffect(() => {
-    // Function to update progress
-    const updateProgress = () => {
-      // Calculate the new progress value
-      const newProgress = Math.min(progress + 3, 100);
-      // Update the progress state
-      setProgress(newProgress);
-    };
-
-    // Start updating progress every 3 seconds
-    const interval = setInterval(updateProgress, 3000);
-
-    // Cleanup function to clear the interval
-    return () => clearInterval(interval);
-  }, [progress]); // Run the effect whenever progress changes
-
-  useEffect(() => {
-    // setImgUrl(imageUrl);
-    // console.log(imageUrl);
-
-        const loadImage = () => {
-          setImgUrl(imageUrl);
-          // Reset progress to 0 when a new image URL is set
-          setProgress(0);
-        };
-
-        if (imageUrl) {
-          loadImage();
-        }
+    setImgUrl(imageUrl);
+    console.log(imageUrl);
   }, [imageUrl]);
 
   return (
@@ -55,19 +28,17 @@ const OutputControl = () => {
         )}
 
         {loadingState === "loading" && (
-          // <span className="text-sm opacity-50">Loading... </span>
-          <>
-            <Progress value={progress} />
-
-            {/* <Skeleton  className="h-full w-full "/> */}
-          </>
+          <span className="text-sm opacity-50">
+            <Loader2 className="animate-spin" size={75} strokeWidth={1.25} />
+          </span>
         )}
 
         {loadingState === "loaded" && (
           <img
             src={imgUrl}
             alt="output"
-            className=" h-full object-cover rounded-md"
+
+            className=" h-full object-cover rounded-md saturate-[0.75] contrast-[0.95]"
           />
         )}
       </div>

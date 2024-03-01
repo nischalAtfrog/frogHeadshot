@@ -16,7 +16,6 @@ import OutputControl from "@/components/output-control";
 const Home = () => {
   const [open, setOpen] = useState(false);
 
-
   const wait = () => new Promise((resolve) => setInterval(resolve, 1000));
 
   useEffect(() => {
@@ -48,39 +47,39 @@ const Home = () => {
             Get your professional portrait done by AI within minutes. But Its in
             Beta, so AI's gonna need help in setting some qualities that could
             make you stand out.
-          
-            {/* <DialogContent className="mt-2">
+            <span className="mt-2">
               {"  Instructions to use"}
               <ul className="mt-2 ml-3 ">
-                <li className="mt-2 list-item">
+                <li className="mt-4 ml-2 list-item opacity-50">
                   1. Set you Age, Gender, and Body type ( m,l,xl,xxl )
                 </li>
-                <li className="mt-2 list-item">
+                <li className="mt-4 ml-2 list-item opacity-50">
                   2. ControlNet scale: 0.5-0.7 works best - this controls how
                   closely the generated image matches the prompt; mid-range
                   values tend to work well
                 </li>
-                <li className="mt-2 list-item ">
+                <li className="mt-4 ml-2 list-item opacity-50">
                   3. IP Adapter scale: 0.5-0.7 works best - this controls how
                   much your facial features are incorporated; mid-range values
                   tend to work well
                 </li>
-                <li className="mt-2 list-item ">
+                <li className="mt-4 ml-2 list-item opacity-50 ">
                   4. Upload your image - select an image from your device to use
                   as the base for the generated image
                 </li>
-                <li className="mt-2 list-item ">
+                <li className="mt-4 ml-2 list-item opacity-50 ">
                   5. Select orientation (note image may not match if different
                   than original) - choose the pose/orientation of the generated
                   image, but note it may not fully match if you select a
                   different orientation than the original picture
                 </li>
-                <li className="mt-2 list-item ">
-                  6. friedolin logo added bottom left - the logo is automatically
-                  added to the bottom left corner of the generated image
+                <li className="mt-4 ml-2 list-item opacity-50 ">
+                  6. friedolin logo added bottom left - the logo is
+                  automatically added to the bottom left corner of the generated
+                  image
                 </li>
               </ul>
-            </DialogContent> */}
+            </span>
           </DialogDescription>
           <hr className="mt-2" />
           <span className=" text-destructive text-sm">
@@ -114,8 +113,13 @@ const Home = () => {
           <div className="right h-full  border-2 rounded-[20px] relative col-span-3 p-5 ">
             <OutputControl />
           </div>
+          <div className="col-span-1  h-full  border-2 rounded-[20px] border-dashed flex justify-center items-center">
+            <h2 className=" text-foreground opacity-50 ">
+              Additional features{" "}
+            </h2>
+          </div>
         </div>
-        <span className="mt-5">Made with 🧠 & ❤️ by DT, frog India </span>
+        <span className="mt-5">Made with 🧠 & ❤️ by DT, frogIndia </span>
       </main>
     </React.Fragment>
   );
