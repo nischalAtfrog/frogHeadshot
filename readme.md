@@ -8,3 +8,6 @@ setting up The Portraits server notebook
 - run the mount drive script on the first cell of the collab
 - clone the models in your googledrive from [here](https://drive.google.com/drive/folders/1WzMabItwIllmDNjVScO3gL58OX-f2TL_?usp=sharing)
 - run all cells
+
+UI - 
+- Please refresh the UI after every generation.
