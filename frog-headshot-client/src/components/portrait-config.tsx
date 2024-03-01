@@ -38,6 +38,10 @@ const PortraitConfig = () => {
 
   const [urlTotheColab, setUrlToTheColab] = useState<string | null>(null);
 
+  const [imageUploaded, setImageUploaded] = useState(false);
+
+
+
   const getImageURL = async (): Promise<void> => {
     if (file) {
       try {
@@ -68,9 +72,10 @@ const PortraitConfig = () => {
     if (file) {
       setIsUploading(true); // Set uploading state to true when starting upload
       try {
+        const randomFilename = `${Date.now()}_${Math.random().toString(36).substring(2)}`;
         const { data, error } = await supabase.storage
           .from("portrait_bucket")
-          .upload(file.name, file);
+          .upload(randomFilename, file);
 
         if (data) {
           await getImageURL();
@@ -84,6 +89,8 @@ const PortraitConfig = () => {
       } finally {
         setIsUploading(false); // Reset uploading state after upload is complete
       }
+
+      setImageUploaded(true);
     }
   };
 
@@ -97,57 +104,60 @@ const PortraitConfig = () => {
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    setLoadingState("loading");
+    if (imageUploaded === true) {
+      setLoadingState("loading");
 
-    const formData = new FormData(e.currentTarget as HTMLFormElement);
+      const formData = new FormData(e.currentTarget as HTMLFormElement);
 
-    // Call handleUpload and wait for it to complete
-    // await handleUpload();
+      // Call handleUpload and wait for it to complete
+      // await handleUpload();
 
-    const age = formData.get("age");
-    const gender = formData.get("gender");
-    const body = formData.get("body_type");
-    const controlNet = formData.get("controlnet");
-    const ip = formData.get("ipadapter");
-    const style = formData.get("style");
-    const orientation = formData.get("orientation");
-    const branding = formData.get("branding");
+      const age = formData.get("age");
+      const gender = formData.get("gender");
+      const body = formData.get("body_type");
+      const controlNet = formData.get("controlnet");
+      const ip = formData.get("ipadapter");
+      const style = formData.get("style");
+      const orientation = formData.get("orientation");
+      const branding = formData.get("branding");
 
-    const encodedImgUrl = encodeURIComponent(image as string);
-    console.log("-------" + encodedImgUrl);
-    const url = `${urlTotheColab}/generate/?age=${age}&gender=${gender}&body=${body}&controlnet=${controlNet}&imgUrl=${encodedImgUrl}&ip=${ip}&style=${style}&orientation=${orientation}&branding=${branding}`;
-    console.log(url);
+      const encodedImgUrl = encodeURIComponent(image as string);
+      console.log("-------" + encodedImgUrl);
+      const url = `${urlTotheColab}/generate/?age=${age}&gender=${gender}&body=${body}&controlnet=${controlNet}&imgUrl=${encodedImgUrl}&ip=${ip}&style=${style}&orientation=${orientation}&branding=${branding}`;
+      console.log(url);
 
-    const requestOptions = {
-      method: "POST",
-      headers: new Headers({
-        "ngrok-skip-browser-warning": "69420",
-      }),
-    };
+      const requestOptions = {
+        method: "POST",
+        headers: new Headers({
+          "ngrok-skip-browser-warning": "69420",
+        }),
+      };
 
-    try {
-      const response = await fetch(url, requestOptions); // Use the constructed URL
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
+      try {
+        const response = await fetch(url, requestOptions); // Use the constructed URL
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data = await response.json();
+        console.log("Response:", data);
+        setImageUrl(data.image);
+        setLoadingState("loaded");
+
+        formData.delete("age");
+        formData.delete("gender");
+        formData.delete("body_type");
+        formData.delete("controlnet");
+        formData.delete("ipadapter");
+        formData.delete("style");
+        formData.delete("orientation");
+        formData.delete("branding");
+      } catch (error) {
+        console.error("Error:", error);
       }
-      const data = await response.json();
-      console.log("Response:", data);
-      setImageUrl(data.image);
-      setLoadingState("loaded");
-
-      formData.delete("age");
-      formData.delete("gender");
-      formData.delete("body_type");
-      formData.delete("controlnet");
-      formData.delete("ipadapter");
-      formData.delete("style");
-      formData.delete("orientation");
-      formData.delete("branding");
-    } catch (error) {
-      console.error("Error:", error);
+    } else {
+      alert("Click on the upload image button");
     }
   };
-
   const fetchLatestEntry = async () => {
     try {
       const { data, error } = await supabase
@@ -285,7 +295,7 @@ const PortraitConfig = () => {
                   type="file"
                   className="hidden"
                   onChange={handleFileChange}
-                  required
+                  required={image ? false : true}
                 />
 
                 <Button
@@ -413,9 +423,10 @@ const PortraitConfig = () => {
               <Button
                 className=" w-[90%] absolute bottom-5 rounded-[10px] text-[18px] h-fit p-3 font-bold text-white  transition-all duration-200 active:scale-[0.97] "
                 type="submit"
-                disabled={true}
+                
               >
-                Generated! {<Check className="ml-2" strokeWidth={1.5} />}
+                Generate Again ?
+                {/* {<Check className="ml-2" strokeWidth={1.5} />} */}
               </Button>
             </>
           )}

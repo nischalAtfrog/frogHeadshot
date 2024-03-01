@@ -25,6 +25,7 @@ const OutputControl = () => {
     console.log(imageUrl);
     if (imageUrl) {
       clearBucket();
+      
     }
   }, [imageUrl]);
 

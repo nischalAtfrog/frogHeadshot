@@ -19,7 +19,6 @@ const Home = () => {
 
   const wait = () => new Promise((resolve) => setInterval(resolve, 1000));
 
-
   useEffect(() => {
     let intervalId: string | number | NodeJS.Timeout | undefined;
 
@@ -35,6 +34,18 @@ const Home = () => {
     };
   }, []);
 
+  const handleList = async () => {
+    const { data, error } = await supabase.storage.listBuckets();
+
+    if (data) {
+      console.log(data);
+    } else {
+      console.error(error);
+    }
+
+  
+  };
+
   // useEffect(() => {
   //   wait().then(() => {
   //     setInterval(async () => {
@@ -45,6 +56,7 @@ const Home = () => {
 
   return (
     <React.Fragment>
+      <button onClick={handleList}>sfsdfsdfs</button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className=" ">
           <DialogHeader>
