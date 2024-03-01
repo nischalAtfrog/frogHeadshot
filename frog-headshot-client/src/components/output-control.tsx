@@ -1,9 +1,10 @@
 import { useImage } from "@/hooks/useImage";
 import { supabase } from "@/lib/supabaseClient";
-import { Loader2 } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-// import { Progress } from "./ui/progress";
-// import { Skeleton } from "./ui/skeleton";
+import { saveAs } from "file-saver"; 
+import { Button } from "./ui/button";
+
 
 const OutputControl = () => {
   const { imageUrl, loadingState } = useImage();
@@ -25,9 +26,16 @@ const OutputControl = () => {
     console.log(imageUrl);
     if (imageUrl) {
       clearBucket();
-      
     }
   }, [imageUrl]);
+
+  const handleDownload = () => {
+    // Check if imageUrl is available
+    if (imageUrl) {
+      // Use file-saver to trigger download
+      saveAs(imgUrl, "output_image.jpg");
+    }
+  };
 
   return (
     <div className=" w-full flex items-start flex-col  relative rounded-[20px]  h-[100%] ">
@@ -56,6 +64,17 @@ const OutputControl = () => {
           />
         )}
       </div>
+
+      {/* Download button */}
+      <Button
+        className="absolute bottom-4 right-4 rounded-full flex justify-center items-center bg-secondary"
+        onClick={handleDownload}
+        disabled={
+          loadingState === "loading" || loadingState === "idle" ? true : false
+        }
+      >
+        <span className="text-md">Download</span> {<Download className="w-4 h-4 ml-2" />}
+      </Button>
     </div>
   );
 };

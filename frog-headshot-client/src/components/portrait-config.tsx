@@ -286,7 +286,7 @@ const PortraitConfig = () => {
               <div className="flex w-full justify-center items-center">
                 <Label
                   htmlFor="picture"
-                  className="text-sm upload-image flex justify-center items-center opacity-50  bg-secondary p-3 rounded-xl cursor-pointer "
+                  className="text-sm w-[100%] h-10 upload-image flex justify-center items-center opacity-50  bg-secondary p-3 rounded-xl cursor-pointer text-pretty overflow-hidden "
                 >
                   {file ? file.name : "Upload Image"}
                 </Label>
