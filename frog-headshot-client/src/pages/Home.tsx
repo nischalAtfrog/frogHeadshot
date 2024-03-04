@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Info } from "lucide-react";
 import OutputControl from "@/components/output-control";
-import { supabase } from "@/lib/supabaseClient";
+
 
 const Home = () => {
   const [open, setOpen] = useState(false);
@@ -30,21 +30,20 @@ const Home = () => {
     });
 
     return () => {
-      clearInterval(intervalId); // Cleanup function to clear the interval
+      clearInterval(intervalId); 
     };
   }, []);
 
-  const handleList = async () => {
-    const { data, error } = await supabase.storage.listBuckets();
+  // const handleList = async () => {
+  //   const { data, error } = await supabase.storage.listBuckets();
 
-    if (data) {
-      console.log(data);
-    } else {
-      console.error(error);
-    }
+  //   if (data) {
+  //     console.log(data);
+  //   } else {
+  //     console.error(error);
+  //   }
 
-  
-  };
+  // };
 
   // useEffect(() => {
   //   wait().then(() => {
